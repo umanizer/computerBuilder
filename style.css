@@ -1,0 +1,18 @@
+.select {
+  display: inline-block;
+  width: 280px;
+  border-radius: 0.25rem;
+  height: 30px;
+}
+.storageSelect {
+  display: inline-block;
+  width: 120px;
+  border-radius: 0.25rem;
+  height: 30px;
+}
+.howMany {
+  display: inline-block;
+  width: 50px;
+  border-radius: 0.25rem;
+  height: 30px;
+}
