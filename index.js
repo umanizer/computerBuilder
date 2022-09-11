@@ -92,7 +92,23 @@ function viewDisplay() {
     </select>
   </div>
 
-  <button class="btn btn-primary mx-1 my-3">Add PC</button>
+  <button id="addPcBtn" class="btn btn-primary mx-1 my-3">Add PC</button>
+
+  <div class="bg-primary d-none col-12 py-3" id="pcInfo">
+  <div class="col-12">
+    <h3 class="text-center text-white">Your PC1</h3>
+  </div>
+  <div id=pcDetail></div>
+
+  <div class="row">
+    <div class="col text-white" id="game-score">
+      <h3>Gaming:</h3>
+    </div>
+    <div class="col text-white" id="work-score">
+      <h3>Work:</h3>
+    </div>
+  </div>
+  </div>
     `;
 
   // apiからcpuのオブジェクトを取得し内容を反映
@@ -107,6 +123,10 @@ function viewDisplay() {
   const storageSizeEl = document.getElementById("storageSize");
   const storageBrandEl = document.getElementById("storageBrand");
   const storageModelEl = document.getElementById("storageModel");
+  const addPcBtn = document.getElementById("addPcBtn");
+  const pcInfo = document.getElementById("pcInfo");
+  const pcDetail = document.getElementById("pcDetail");
+  console.log(pcInfo);
 
   // cpu初期描画
   initialRendering(config.cpu, cpuBrandEl, cpuModelEl);
@@ -129,7 +149,11 @@ function viewDisplay() {
   });
   //Storageの種類が選択された時の処理
   selectStorageEl.addEventListener("change", (event) => {
-    console.log("///////" + event.target.value);
+    // console.log("///////" + event.target.value);
+    // storageSizeEl.innerHTML = `<option>-</option>`;
+    storageBrandEl.innerHTML = `<option>-</option>`;
+    storageModelEl.innerHTML = `<option>-</option>`;
+
     if (event.target.value == "HDD")
       afterProcess(
         event,
@@ -152,6 +176,60 @@ function viewDisplay() {
   memoryMany.addEventListener("change", (event) => {
     afterProcess(event, config.ram, memoryBrandEl, memoryModelEl);
   });
+
+  //AddPCが押された時の処理
+  addPcBtn.addEventListener("click", () => {
+    // confirm("全ての項目を選択してください");
+    //選択された各パーツの情報を取得
+    const partsObj = {
+      CPU: {
+        Brand: cpuBrandEl.value,
+        Model: cpuModelEl.value,
+      },
+
+      GPU: {
+        Brand: gpuBrandEl.value,
+        Model: gpuModelEl.value,
+      },
+
+      RAM: {
+        Brand: memoryBrandEl.value,
+        Model: memoryModelEl.value,
+      },
+      STORAGE: {
+        Disk: selectStorageEl.value,
+        Storage: storageSizeEl.value,
+        Brand: storageBrandEl.value,
+        Model: storageModelEl.value,
+      },
+    };
+    // 初期化
+    pcDetail.innerHTML = ""
+    // console.log(partsObj)
+    for (const property in partsObj) {
+      divEl = document.createElement("div");
+      divEl.classList.add("col-12", "text-white", "pb-2");
+
+      let detailObj = partsObj[property];
+      let htmlString = `<h4>${property}</h4>`;
+
+      for (const key in detailObj) {
+        if (detailObj[key] === "") {
+          confirm("全ての項目を選択してください");
+          return;
+        }
+        htmlString += `
+        <p>${key}:${detailObj[key]}</p>
+        `;
+      }
+
+      divEl.innerHTML = htmlString;
+      pcDetail.append(divEl);
+    }
+
+    //PCの情報一覧を表示
+    pcInfo.classList.remove("d-none");
+  });
 }
 
 //パーツ名を受け取りapiに接続してselectBoxにoptionの項目を追加
@@ -163,17 +241,17 @@ function afterProcess(
   referentEl2,
   referentEl3
 ) {
-  console.log(event.target.value);
-  console.log(parts);
+  // console.log(event.target.value);
+  // console.log(parts);
   // APIからパーツのデータを取得
   const data = getApiInfo(parts);
   data.then((data) => {
-    console.log(data);
-    console.log(event.target.value);
+    // console.log(data);
+    // console.log(event.target.value);
     // Brandが選択された時の処理
     if (event.target.name === "Brand") {
-      console.log("Brandが選択されました");
-      console.log(data);
+      // console.log("Brandが選択されました");
+      // console.log(data);
 
       const arrSet = createOptionFilterArr(
         data,
@@ -194,13 +272,12 @@ function afterProcess(
       );
       // RAMが選択された時の処理
     } else if (parts === "ram") {
-      ramProcessing(data,event.target.value,referencesEl,referentEl1)
-
+      ramProcessing(data, event.target.value, referencesEl, referentEl1);
     }
   });
 }
 function ramProcessing(data, eventValue, referencesEl, referentEl1) {
-  console.log(`Ramの数量 ${eventValue} が選択されました`);
+  // console.log(`Ramの数量 ${eventValue} が選択されました`);
   referencesEl.innerHTML = `<option>-</option>`;
   referentEl1.innerHTML = `<option>-</option>`;
 
@@ -210,13 +287,13 @@ function ramProcessing(data, eventValue, referencesEl, referentEl1) {
     const slotNum = modelInfo[modelLen].substring(0, 1);
     return eventValue === slotNum;
   });
-  console.log(filterData);
+  // console.log(filterData);
   const arrSet = createOptionArr(filterData, referencesEl.name);
-  console.log(arrSet);
+  // console.log(arrSet);
   insertOption(arrSet, "", referencesEl);
 
   referencesEl.addEventListener("change", (event) => {
-    console.log(`RamのBrand ${eventValue} が選択されました`);
+    // console.log(`RamのBrand ${eventValue} が選択されました`);
     referentEl1.innerHTML = `<option>-</option>`;
     const arrSet = createOptionFilterArr(
       filterData,
@@ -224,7 +301,7 @@ function ramProcessing(data, eventValue, referencesEl, referentEl1) {
       referencesEl.name,
       referentEl1.name
     );
-    console.log(arrSet);
+    // console.log(arrSet);
     insertOption(arrSet, "", referentEl1);
   });
 }
@@ -237,60 +314,60 @@ function storageProcessing(
   referentEl2,
   referentEl3
 ) {
-  console.log(data[0].Type);
-  console.log(eventValue);
-  console.log(referentEl1);
-  console.log(referentEl2);
-  console.log(referentEl3);
+  // console.log(data[0].Type);
+  // console.log(eventValue);
+  // console.log(referentEl1);
+  // console.log(referentEl2);
+  // console.log(referentEl3);
   // サイズを抜き取るためModelで検索しmodel情報を取得
   const storageArrSet = createOptionArr(data, referentEl3.name);
-  console.log(storageArrSet);
+  // console.log(storageArrSet);
   // モデル情報からストレージのサイズ一覧を配列で返す
   const storageSizeArr = returnsTheRequiredStringArr(storageArrSet);
-  console.log(storageSizeArr);
+  // console.log(storageSizeArr);
   insertOption(storageSizeArr, "", referentEl1);
 
   //Storageのサイズが選択されたら
   referentEl1.addEventListener("change", (event) => {
-    console.log(event.target.value);
-    console.log(referentEl2);
+    // console.log(event.target.value);
+    // console.log(referentEl2);
 
     if (event.target.name == "size") {
-      console.log("ストレージサイズが選択されました");
+      // console.log("ストレージサイズが選択されました");
       referentEl2.innerHTML = `<option>-</option>`;
-      console.log(referentEl2);
+      // console.log(referentEl2);
       referentEl3.innerHTML = `<option>-</option>`;
-      console.log(referentEl3);
+      // console.log(referentEl3);
 
-      console.log(event.target.value);
-      console.log(data);
-      console.log(referentEl1.name);
-      console.log(referentEl2.name);
+      // console.log(event.target.value);
+      // console.log(data);
+      // console.log(referentEl1.name);
+      // console.log(referentEl2.name);
       const arrSet = strReturnObjArr(
         data,
         event.target.value,
         referentEl2.name,
         referentEl3.name
       );
-      console.log(arrSet);
+      // console.log(arrSet);
       insertOption(arrSet, "", referentEl2);
 
       referentEl2.addEventListener("change", (event) => {
-        console.log("Brandが選択されました");
+        // console.log("Brandが選択されました");
         referentEl3.innerHTML = `<option>-</option>`;
 
         const filterData = data.filter(
           (obj) => obj[referentEl3.name].indexOf(referentEl1.value) != -1
         );
-        console.log(filterData);
-        console.log(referentEl3.name);
+        // console.log(filterData);
+        // console.log(referentEl3.name);
         const arrSet = createOptionFilterArr(
           filterData,
           event.target.value, //Brand
           referentEl2.name, //Brand名
           referentEl3.name //Model
         );
-        console.log(arrSet);
+        // console.log(arrSet);
         insertOption(arrSet, "", referentEl3);
       });
     }
@@ -328,10 +405,10 @@ function strReturnObjArr(data, findStr, objKey1, objKey2) {
 
 // APIからのdataと要素名を受け取って配列の中のオブジェクトのkeyを要素名にし、その値を配列(重複なし)にして返す
 function createOptionArr(data, elName) {
-  console.log(data, elName);
+  // console.log(data, elName);
   const arrSet = Array.from(new Set(data.map((obj) => obj[elName])));
   // console.log("item数　" + arrSet.length);
-  console.log(arrSet);
+  // console.log(arrSet);
   return arrSet;
 }
 
@@ -386,15 +463,15 @@ function initialRendering(parts, referencesEl, referentEl1) {
   data.then((data) => {
     // 初期描画 CPU,GPUのBrandのセレクトボックスの処理
     if (data[0].Type === "CPU" || data[0].Type === "GPU") {
-      console.log("CPUGPU初期描画");
+      // console.log("CPUGPU初期描画");
       const cpuGpuArr = createOptionArr(data, referencesEl.name);
       insertOption(cpuGpuArr, referencesEl, referentEl1);
     } else if (data[0].Type === "RAM") {
-      console.log("RAM初期描画");
+      // console.log("RAM初期描画");
       // 初期描画 RAM,HDD,SSDのBrandのセレクトボックスの処理
       insertOption(config.RamArr, referencesEl, referentEl1);
     } else if (data[0].Type === "HDD" || data[0].Type === "SSD") {
-      console.log("Storage初期描画");
+      // console.log("Storage初期描画");
       insertOption(config.storageTypeArr, referencesEl, referentEl1);
     }
   });
@@ -409,3 +486,4 @@ function getApiInfo(parts) {
 }
 
 viewDisplay();
+
